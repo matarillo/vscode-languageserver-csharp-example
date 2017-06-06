@@ -1,2 +1,2 @@
-# vscode-languageserver-node-example
-Sample language server implemented in Node
+# vscode-languageserver-csharp-example
+Sample language server implemented in C#
