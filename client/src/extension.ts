@@ -7,20 +7,19 @@
 import * as path from 'path';
 
 import { workspace, Disposable, ExtensionContext } from 'vscode';
-import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, TransportKind } from 'vscode-languageclient';
+import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, Executable, TransportKind } from 'vscode-languageclient';
 
 export function activate(context: ExtensionContext) {
 
-	// The server is implemented in node
-	let serverModule = context.asAbsolutePath(path.join('server', 'server.js'));
-	// The debug options for the server
-	let debugOptions = { execArgv: ["--nolazy", "--debug=6009"] };
+	// The server is implemented in C#
+	let serverCommand = context.asAbsolutePath(path.join('server', 'SampleServer.exe'));
+	let commandOptions = { stdio: 'pipe' };
 	
 	// If the extension is launched in debug mode then the debug server options are used
 	// Otherwise the run options are used
 	let serverOptions: ServerOptions = {
-		run : { module: serverModule, transport: TransportKind.ipc },
-		debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions }
+		run : { command: serverCommand, options: commandOptions },
+		debug: { command: serverCommand, options: commandOptions }
 	}
 	
 	// Options to control the language client
