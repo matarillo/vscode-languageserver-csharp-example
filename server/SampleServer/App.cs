@@ -11,17 +11,15 @@ using System.IO;
 
 namespace SampleServer
 {
-    public class App : Connection
+    public class App : ServiceConnection
     {
         private Uri _workerSpaceRoot;
         private int _maxNumberOfProblems;
-        private Proxy _proxy;
         private TextDocumentManager _documents;
 
         public App(Stream input, Stream output)
             : base(input, output)
         {
-            _proxy = new Proxy(this);
             _documents = new TextDocumentManager();
             _documents.Changed += Documents_Changed;
         }
@@ -31,7 +29,7 @@ namespace SampleServer
             ValidateTextDocument(e.Document);
         }
 
-        internal Result<InitializeResult, ResponseError<InitializeErrorData>> Initialize(InitializeParams @params)
+        protected override Result<InitializeResult, ResponseError<InitializeErrorData>> Initialize(InitializeParams @params)
         {
             _workerSpaceRoot = @params.rootUri;
             var result = new InitializeResult
@@ -48,25 +46,25 @@ namespace SampleServer
             return Result<InitializeResult, ResponseError<InitializeErrorData>>.Success(result);
         }
 
-        internal void DidOpenTextDocument(DidOpenTextDocumentParams @params)
+        protected override void DidOpenTextDocument(DidOpenTextDocumentParams @params)
         {
             _documents.Add(@params.textDocument);
             Logger.Instance.Log($"{@params.textDocument.uri} opened.");
         }
 
-        internal void DidChangeTextDocument(DidChangeTextDocumentParams @params)
+        protected override void DidChangeTextDocument(DidChangeTextDocumentParams @params)
         {
             _documents.Change(@params.textDocument.uri, @params.textDocument.version, @params.contentChanges);
             Logger.Instance.Log($"{@params.textDocument.uri} changed.");
         }
 
-        internal void DidCloseTextDocument(DidCloseTextDocumentParams @params)
+        protected override void DidCloseTextDocument(DidCloseTextDocumentParams @params)
         {
             _documents.Remove(@params.textDocument.uri);
             Logger.Instance.Log($"{@params.textDocument.uri} closed.");
         }
 
-        internal void DidChangeConfiguration(DidChangeConfigurationParams @params)
+        protected override void DidChangeConfiguration(DidChangeConfigurationParams @params)
         {
             _maxNumberOfProblems = @params?.settings?.languageServerExample?.maxNumberOfProblems ?? 100;
             foreach (var document in _documents.All)
@@ -101,19 +99,19 @@ namespace SampleServer
                 }
             }
 
-            _proxy.TextDocument.PublishDiagnostics(new PublishDiagnosticsParams
+            Proxy.TextDocument.PublishDiagnostics(new PublishDiagnosticsParams
             {
                 uri = document.uri,
                 diagnostics = diagnostics.ToArray()
             });
         }
 
-        internal void DidChangeWatchedFiles(DidChangeWatchedFilesParams @params)
+        protected override void DidChangeWatchedFiles(DidChangeWatchedFilesParams @params)
         {
             Logger.Instance.Log("We received an file change event");
         }
 
-        internal Result<ArrayOrObject<CompletionItem, CompletionList>, ResponseError> Completion(TextDocumentPositionParams @params)
+        protected override Result<ArrayOrObject<CompletionItem, CompletionList>, ResponseError> Completion(TextDocumentPositionParams @params)
         {
             var array = new[]
             {
@@ -133,7 +131,7 @@ namespace SampleServer
             return Result<ArrayOrObject<CompletionItem, CompletionList>, ResponseError>.Success(array);
         }
 
-        internal Result<CompletionItem, ResponseError> ResolveCompletionItem(CompletionItem @params)
+        protected override Result<CompletionItem, ResponseError> ResolveCompletionItem(CompletionItem @params)
         {
             if (@params.data == 1)
             {

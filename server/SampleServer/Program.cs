@@ -17,10 +17,9 @@ namespace SampleServer
             Serializer.Instance = new JsonDotNetSerializer();
             var app = new App(Console.OpenStandardInput(), Console.OpenStandardOutput());
             Logger.Instance.Attach(app);
-            app.RegisterHandlerMethods(new[] { typeof(GeneralService), typeof(WorkspaceService), typeof(TextDocumentService) });
             try
             {
-                app.Start().Wait();
+                app.Listen().Wait();
             }
             catch (AggregateException ex)
             {
