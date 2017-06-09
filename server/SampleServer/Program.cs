@@ -14,7 +14,6 @@ namespace SampleServer
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            Serializer.Instance = new JsonDotNetSerializer();
             var app = new App(Console.OpenStandardInput(), Console.OpenStandardOutput());
             Logger.Instance.Attach(app);
             try
