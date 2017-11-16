@@ -13,6 +13,7 @@
 		"postinstall": "cd server && npm install && cd ../client && npm install && cd ..",
 		"compile": "tsc -p client/tsconfig.json && cd server && npm run compile && cd ..",
 		"compile:client": "tsc -p client/tsconfig.json",
+		"watch:client": "tsc -w -p client/tsconfig.json",
 		"compile:server": "cd server && npm run compile && cd .."
 	},
 	"devDependencies": {
