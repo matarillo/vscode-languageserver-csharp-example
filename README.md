@@ -11,11 +11,13 @@ The code for the extension is in the 'client' folder. It uses the 'vscode-langua
 
 The language server is located in the 'server' folder. 
 
+# Modification from the original
+Sample language server is implemented in C#.
 
 # How to run locally
 * `npm install` to initialize the extension and the server
 * `npm run compile` to compile the extension and the server
 * open this folder in VS Code. In the Debug viewlet, run 'Launch Client' from drop-down to launch the extension and attach to the extension.
 * create a file `test.txt`, and type `typescript`. You should see a validation error.
-* to debug the server use the 'Attach to Server' launch config.
+* to debug the server use external debugger such as Visual Studio.
 * set breakpoints in the client or the server.
