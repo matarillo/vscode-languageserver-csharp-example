@@ -6,43 +6,70 @@
 
 import * as path from 'path';
 import * as os from 'os';
-
 import { workspace, ExtensionContext } from 'vscode';
-import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient';
+
+import {
+	LanguageClient,
+	LanguageClientOptions,
+	ServerOptions,
+	TransportKind
+} from 'vscode-languageclient';
+
+let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-
 	// The server is implemented in C#
-	let serverCommand = context.asAbsolutePath(path.join('server', 'SampleServer.exe'));
-	let commandOptions = { stdio: 'pipe' };
-	
-	// If the extension is launched in debug mode then the debug server options are used
-	// Otherwise the run options are used
-	let serverOptions: ServerOptions =
-		(os.platform() === 'win32') ? {
-			run : { command: serverCommand, options: commandOptions },
-			debug: { command: serverCommand, options: commandOptions }
-		} : {
-			run : { command: 'mono', args: [serverCommand], options: commandOptions },
-			debug: { command: 'mono', args: [serverCommand], options: commandOptions }
+	let serverCommand = context.asAbsolutePath(
+		path.join('server', 'out', 'SampleServer.exe')
+	);
+
+	let serverOptions: ServerOptions = (os.platform() === 'win32') ? {
+		run: {
+			command: serverCommand,
+			transport: TransportKind.stdio
+		},
+		debug: {
+			command: serverCommand,
+			transport: TransportKind.stdio
 		}
-	
+	} : {
+		run: {
+			command: 'mono',
+			args: [serverCommand],
+			transport: TransportKind.stdio
+		},
+		debug: {
+			command: 'mono',
+			args: [serverCommand],
+			transport: TransportKind.stdio
+		}
+	};
+
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
-		documentSelector: [{scheme: 'file', language: 'plaintext'}],
+		documentSelector: [{ scheme: 'file', language: 'plaintext' }],
 		synchronize: {
-			// Synchronize the setting section 'languageServerExample' to the server
-			configurationSection: 'lspSample',
-			// Notify the server about file changes to '.clientrc files contain in the workspace
+			// Notify the server about file changes to '.clientrc files contained in the workspace
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
 		}
-	}
-	
+	};
+
 	// Create the language client and start the client.
-	let disposable = new LanguageClient('lspSample', 'Language Server Example', serverOptions, clientOptions).start();
-	
-	// Push the disposable to the context's subscriptions so that the 
-	// client can be deactivated on extension deactivation
-	context.subscriptions.push(disposable);
+	client = new LanguageClient(
+		'languageServerExample',
+		'Language Server Example',
+		serverOptions,
+		clientOptions
+	);
+
+	// Start the client. This will also launch the server
+	client.start();
+}
+
+export function deactivate(): Thenable<void> {
+	if (!client) {
+		return undefined;
+	}
+	return client.stop();
 }
