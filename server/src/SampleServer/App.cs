@@ -14,7 +14,7 @@ namespace SampleServer
     public class App : ServiceConnection
     {
         private Uri _workerSpaceRoot;
-        private int _maxNumberOfProblems;
+        private int _maxNumberOfProblems = 100;
         private TextDocumentManager _documents;
 
         public App(Stream input, Stream output)
