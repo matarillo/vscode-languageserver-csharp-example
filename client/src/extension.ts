@@ -5,23 +5,36 @@
 'use strict';
 
 import * as path from 'path';
+import * as os from 'os';
+import { workspace, ExtensionContext } from 'vscode';
 
-import { workspace, Disposable, ExtensionContext } from 'vscode';
-import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, Executable, TransportKind } from 'vscode-languageclient';
+import {
+	LanguageClient,
+	LanguageClientOptions,
+	ServerOptions,
+	ExecutableOptions,
+	Executable
+} from 'vscode-languageclient';
+
+let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
 
 	// The server is implemented in C#
 	let serverCommand = context.asAbsolutePath(path.join('server', 'SampleServer.exe'));
-	let commandOptions = { stdio: 'pipe' };
+	let commandOptions: ExecutableOptions = { stdio: 'pipe', detached: false };
 	
 	// If the extension is launched in debug mode then the debug server options are used
 	// Otherwise the run options are used
-	let serverOptions: ServerOptions = {
-		run : { command: serverCommand, options: commandOptions },
-		debug: { command: serverCommand, options: commandOptions }
-	}
-	
+	let serverOptions: ServerOptions =
+		(os.platform() === 'win32') ? {
+			run : <Executable>{ command: serverCommand, options: commandOptions },
+			debug: <Executable>{ command: serverCommand, options: commandOptions }
+		} : {
+			run : <Executable>{ command: 'mono', args: [serverCommand], options: commandOptions },
+			debug: <Executable>{ command: 'mono', args: [serverCommand], options: commandOptions }
+		};
+
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
@@ -32,12 +45,23 @@ export function activate(context: ExtensionContext) {
 			// Notify the server about file changes to '.clientrc files contain in the workspace
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
 		}
-	}
+	};
 	
 	// Create the language client and start the client.
-	let disposable = new LanguageClient('languageServerExample', 'Language Server Example', serverOptions, clientOptions).start();
+	client = new LanguageClient(
+		'languageServerExample',
+		'Language Server Example',
+		serverOptions,
+		clientOptions
+	);
 	
-	// Push the disposable to the context's subscriptions so that the 
-	// client can be deactivated on extension deactivation
-	context.subscriptions.push(disposable);
+	// Start the client. This will also launch the server
+	client.start();
+}
+
+export function deactivate(): Thenable<void> {
+	if (!client) {
+		return undefined;
+	}
+	return client.stop();
 }
