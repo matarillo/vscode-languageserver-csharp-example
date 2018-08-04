@@ -8,6 +8,7 @@ using LanguageServer.Parameters.Workspace;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace SampleServer
 {
@@ -144,6 +145,14 @@ namespace SampleServer
                 @params.documentation = "JavaScript documentation";
             }
             return Result<CompletionItem, ResponseError>.Success(@params);
+        }
+
+        protected override VoidResult<ResponseError> Shutdown()
+        {
+            Logger.Instance.Log("Language Server is about to shutdown.");
+            // WORKAROUND: Language Server does not receive an exit notification.
+            Task.Delay(1000).ContinueWith(_ => Environment.Exit(0));
+            return VoidResult<ResponseError>.Success();
         }
     }
 }
