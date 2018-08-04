@@ -13,7 +13,7 @@ namespace SampleServer
     {
         static void Main(string[] args)
         {
-            Console.OutputEncoding = Encoding.UTF8;
+            Console.OutputEncoding = new UTF8Encoding(); // UTF8N for non-Windows platform
             var app = new App(Console.OpenStandardInput(), Console.OpenStandardOutput());
             Logger.Instance.Attach(app);
             try
