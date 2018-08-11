@@ -15,7 +15,7 @@ namespace SampleServer
     public class App : ServiceConnection
     {
         private Uri _workerSpaceRoot;
-        private int _maxNumberOfProblems;
+        private int _maxNumberOfProblems = 1000;
         private TextDocumentManager _documents;
 
         public App(Stream input, Stream output)
@@ -67,7 +67,8 @@ namespace SampleServer
 
         protected override void DidChangeConfiguration(DidChangeConfigurationParams @params)
         {
-            _maxNumberOfProblems = @params?.settings?.languageServerExample?.maxNumberOfProblems ?? 100;
+            _maxNumberOfProblems = @params?.settings?.languageServerExample?.maxNumberOfProblems ?? _maxNumberOfProblems;
+            Logger.Instance.Log($"maxNumberOfProblems is set to {_maxNumberOfProblems}.");
             foreach (var document in _documents.All)
             {
                 ValidateTextDocument(document);
