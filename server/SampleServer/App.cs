@@ -1,6 +1,5 @@
 ﻿using LanguageServer;
 using LanguageServer.Client;
-using LanguageServer.Json;
 using LanguageServer.Parameters;
 using LanguageServer.Parameters.General;
 using LanguageServer.Parameters.TextDocument;
@@ -113,7 +112,7 @@ namespace SampleServer
             Logger.Instance.Log("We received an file change event");
         }
 
-        protected override Result<CompletionResult, ResponseError> Completion(TextDocumentPositionParams @params)
+        protected override Result<CompletionResult, ResponseError> Completion(CompletionParams @params)
         {
             var array = new[]
             {
